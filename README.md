@@ -9,7 +9,7 @@ _[ICLR 2023](https://openreview.net/forum?id=ApF0dmi1_9K) |
 [GitHub](https://github.com/ruiqini/NTFields) |
 [arXiv](https://arxiv.org/abs/2210.00120)_
 
-<img src="fig/fig.png" width="221" height="94">
+<img src="fig/fig.png" width="663" height="282">
 
 ## Introduction
 
