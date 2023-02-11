@@ -9,8 +9,8 @@ _[ICLR 2023](https://openreview.net/forum?id=ApF0dmi1_9K) |
 [GitHub](https://github.com/ruiqini/NTFields) |
 [arXiv](https://arxiv.org/abs/2210.00120)_
 
-Path &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NTFields
-:----------------------------------------------------------------------------------------------------: 
+Path &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NTFields
+:-------------------------------------------------------------------------------------: 
 ![image](fig/fig.png)  
 
 ## Introduction
