@@ -1,0 +1,3 @@
+[submodule "bvh-distance-queries"]
+	path = bvh-distance-queries
+	url = https://github.com/YuliangXiu/bvh-distance-queries.git
