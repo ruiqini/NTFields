@@ -1,0 +1,5 @@
+exp_name = test
+data_dir = datasets/test
+input_data_glob = /*/model.obj
+num_dim = 3
+num_samples = 100000

@@ -1,0 +1,24 @@
+name: NTFields
+channels:
+  - pytorch
+  - anaconda
+  - conda-forge
+  - soumith
+  - defaults
+dependencies:
+  - cudatoolkit=11.3
+  - numpy=1.22.3
+  - numpy-base=1.22.3
+  - python=3.9.7
+  - pytorch=1.10.2=py3.9_cuda11.3_cudnn8.2.0_0
+  - igl=2.2.1
+  - pip:
+    - open3d
+    - pickle5
+    - -e ./pytorch_kinematics
+    - -e ./bvh-distance-queries
+    - lxml
+
+
+
+

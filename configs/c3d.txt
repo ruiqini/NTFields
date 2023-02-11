@@ -1,0 +1,5 @@
+exp_name = c3d
+data_dir = datasets/c3d
+input_data_glob = /*/model.obj
+num_dim = 3
+num_samples = 500000

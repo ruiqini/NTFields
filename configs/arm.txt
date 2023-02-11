@@ -1,0 +1,5 @@
+exp_name = arm
+data_dir = datasets/arm
+input_data_glob = /*/model.obj
+num_dim = 6
+num_samples = 1000000
