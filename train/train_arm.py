@@ -1,3 +1,5 @@
+import sys
+sys.path.append('.')
 from models import model_arm as md
 from os import path
 

@@ -1,3 +1,5 @@
+import sys
+sys.path.append('.')
 from models import model_3d as md
 from os import path
 

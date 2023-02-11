@@ -49,7 +49,7 @@ def arm_rand_sample_bound_points(numsamples, dim,
 
         x0 = P[PointsInside,:]
         x1 = nP[PointsInside,:]
-        print(x0.shape[0])
+        #print(x0.shape[0])
 
         if(x0.shape[0]<=1):
             continue
@@ -121,11 +121,11 @@ def arm_rand_sample_bound_points(numsamples, dim,
         x1 = x1[where_d]
         y0 = unsigned_distance[where_d]
         
-        print(x1.shape[0])
+        #print(x1.shape[0])
         if(x1.shape[0]<=1):
             continue
 
-        print('x1 ',x0.shape)
+        #print('x1 ',x0.shape)
         th_batch = scale*x1#+base
         whole_p = []
         batch_size = 80000

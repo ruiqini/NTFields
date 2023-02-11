@@ -1,5 +1,4 @@
 import sys
-
 sys.path.append('.')
 import torch
 import pytorch_kinematics as pk
