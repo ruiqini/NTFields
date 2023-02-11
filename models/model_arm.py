@@ -107,7 +107,7 @@ class NN(torch.nn.Module):
         pointsize = 0
         for tg in tg_batch:
             print(iter,tg)
-            if iter>0:
+            if iter>1:
                 v = np.load(out_path_+'/meshes/collision/'+tg+'.npy')
                 pointsize = pointsize+v.shape[0]
                 
@@ -207,7 +207,7 @@ class NN(torch.nn.Module):
         #pointsize = 0
         for tg in tg_batch:
             #print(iter,tg)
-            if iter>0:
+            if iter>1:
                 #v = 
                 #nv = np.ones((v.shape[0],4))
                 #pointsize = pointsize+v.shape[0]
@@ -215,7 +215,7 @@ class NN(torch.nn.Module):
                 #nv[:,:3]=v[:,:3]
                 m = tg_batch[tg].get_matrix()
                 #print(m.shape)
-                t=self.v_list[iter-1]#torch.from_numpy(nv).float().cuda()
+                t=self.v_list[iter-2]#torch.from_numpy(nv).float().cuda()
                 p=torch.matmul(m[:],t.T)
                 #p=p.cpu().numpy()
                 p = torch.permute(p, (2, 0, 1)).contiguous()

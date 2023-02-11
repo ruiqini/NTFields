@@ -40,8 +40,8 @@ for ii in range(5):
     start_goal = [[0.2,-1.5,-0.6,-1.5,
                     -1,1.5,0.8,-1.8]]
 
-    start_goal = [[-0.2*math.pi,0.1,0.5,1.5,
-                    0.3*math.pi,0.1,0.5,1.5]]
+    #start_goal = [[-0.2*math.pi,0.1,0.5,1.5,
+    #                0.3*math.pi,0.1,0.5,1.5]]
 
     #start_goal = [[1.8,-0.2,0.2,2.2,
     #                -2.6,0.2,0.8,1.8]]
@@ -83,8 +83,8 @@ chain = pk.build_serial_chain_from_urdf(
 chain = chain.to(dtype=dtype, device=d)
 
 N = 1
-th_batch = torch.tensor([[-0.2*math.pi,0.1,0.5,1.5,0,1],
-                [0.3*math.pi,0.1,0.5,1.5,1,0]]).cuda()
+#th_batch = torch.tensor([[-0.2*math.pi,0.1,0.5,1.5,0,1],
+#                [0.3*math.pi,0.1,0.5,1.5,1,0]]).cuda()
 tg_batch = chain.forward_kinematics(xyz, end_only = False)
 
 p_list=[]
@@ -92,7 +92,7 @@ iter = 0
 pointsize = 0
 for tg in tg_batch:
     print(iter,tg)
-    if iter>0:
+    if iter>1:
         v = np.load(out_path_+'/meshes/collision/'+tg+'.npy')
         nv = np.ones((v.shape[0],4))
         pointsize = pointsize+v.shape[0]

@@ -32,7 +32,7 @@ conda env create -f NTFields_env.yml
 conda activate NTFields
 ```
 
-Download datasets and pretrained models, exact to the repository directory:
+Download datasets and pretrained models, exact and put `datasets/` `Experiments/` to the repository directory:
 
 [Datasets and pretrained model](https://drive.google.com/file/d/140W0iOJOwA-nku831mQgPIGGQmXAKtrz/view?usp=share_link)
 

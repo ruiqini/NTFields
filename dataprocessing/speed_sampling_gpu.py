@@ -72,8 +72,8 @@ def arm_rand_sample_bound_points(numsamples, dim,
             iter = 0
             pointsize = 0
             for tg in tg_batch:
-                #print(iter,tg)
-                if iter>0:
+                print(iter,tg)
+                if iter>1:
                     v = np.load(out_path_+'/meshes/collision/'+tg+'.npy')
                     nv = np.ones((v.shape[0],4))
                     pointsize = pointsize+v.shape[0]
@@ -142,7 +142,7 @@ def arm_rand_sample_bound_points(numsamples, dim,
             iter = 0
             pointsize = 0
             for tg in tg_batch:
-                if iter>0:
+                if iter>1:
                     #print(tg)
                     v = np.load(out_path_+'/meshes/collision/'+tg+'.npy')
                     nv = np.ones((v.shape[0],4))
