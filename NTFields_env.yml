@@ -15,7 +15,7 @@ dependencies:
   - pip:
     - open3d
     - pickle5
-    - -e ./pytorch_kinematics
+    - pytorch-kinematics
     - -e ./bvh-distance-queries
     - lxml
 
