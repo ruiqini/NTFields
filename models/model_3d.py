@@ -21,54 +21,6 @@ import pickle5 as pickle
 
 from timeit import default_timer as timer
 
-torch.backends.cudnn.benchmark = True
-
-class FastTensorDataLoader:
-    """
-    A DataLoader-like object for a set of tensors that can be much faster than
-    TensorDataset + DataLoader because dataloader grabs individual indices of
-    the dataset and calls cat (slow).
-    Source: https://discuss.pytorch.org/t/dataloader-much-slower-than-manual-batching/27014/6
-    """
-    def __init__(self, *tensors, batch_size=32, shuffle=False):
-        """
-        Initialize a FastTensorDataLoader.
-        :param *tensors: tensors to store. Must have the same length @ dim 0.
-        :param batch_size: batch size to load.
-        :param shuffle: if True, shuffle the data *in-place* whenever an
-            iterator is created out of this object.
-        :returns: A FastTensorDataLoader.
-        """
-        assert all(t.shape[0] == tensors[0].shape[0] for t in tensors)
-        self.tensors = tensors
-
-        self.dataset_len = self.tensors[0].shape[0]
-        self.batch_size = batch_size
-        self.shuffle = shuffle
-
-        # Calculate # batches
-        n_batches, remainder = divmod(self.dataset_len, self.batch_size)
-        if remainder > 0:
-            n_batches += 1
-        self.n_batches = n_batches
-    def __iter__(self):
-        if self.shuffle:
-            r = torch.randperm(self.dataset_len)
-            self.tensors = [t[r] for t in self.tensors]
-        self.i = 0
-        return self
-
-    def __next__(self):
-        if self.i >= self.dataset_len:
-            raise StopIteration
-        batch = tuple(t[self.i:self.i+self.batch_size] for t in self.tensors)
-        self.i += self.batch_size
-        return batch
-
-    def __len__(self):
-        return self.n_batches
-
-
 class NN(torch.nn.Module):
     
     def __init__(self, device, dim):#10
@@ -108,14 +60,13 @@ class NN(torch.nn.Module):
 
         self.scale = 10
 
-        self.act = torch.nn.ELU()#Softplus(beta=self.scale)#ELU,CELU
+        self.act = torch.nn.ELU()
 
         self.nl1=5
         self.nl2=7
 
         self.encoder = torch.nn.ModuleList()
         self.encoder1 = torch.nn.ModuleList()
-        #self.encoder.append(Linear(self.dim,h_size))
         
         self.encoder.append(Linear(dim,h_size))
         self.encoder1.append(Linear(dim,h_size))
@@ -157,11 +108,9 @@ class NN(torch.nn.Module):
         net = self.actvn(self.conv_in(x))
         net = self.conv_in_bn(net)
         f_1 = net
-        #net = self.maxpool(net)  # out 128
-        return f_0, f_1#, f_2, f_3#, f_4, f_5, f_6
-        #return f_0, f_1, f_2, f_3, f_4, f_5, f_6
+        return f_0, f_1
     
-    def env_features(self, coords, f_0, f_1):#, f_3, f_4, f_5, f_6):
+    def env_features(self, coords, f_0, f_1):
         
         coords = coords.clone().detach().requires_grad_(False)
 
@@ -171,14 +120,7 @@ class NN(torch.nn.Module):
         size=p0.shape[0]
 
         p = torch.vstack((p0,p1))
-        #print(p.shape)
-        #p = p
-        '''
-        ptmp = p.clone()
-        ptmp[:,0]=p[:,2]
-        ptmp[:,2]=p[:,0]
-        p=ptmp
-        '''
+        
         p = torch.index_select(p, 1, torch.LongTensor([2,1,0]).to(self.device))
 
 
@@ -193,12 +135,11 @@ class NN(torch.nn.Module):
         feature_1 = F.grid_sample(f_1, p, mode='bilinear', padding_mode='border')
         
 
-        features = torch.cat((feature_0, feature_1), dim=1)  # (B, features, 1,7,sample_num)
-        #features0 = torch.cat((feature_0,feature_1,feature_2, feature_3), dim=1)  # (B, features, 1,7,sample_num)
+        features = torch.cat((feature_0, feature_1), dim=1)  
         
         shape = features.shape
         features = torch.reshape(features,
-                                 (shape[0], shape[1] * shape[3], shape[4]))  # (B, featues_per_sample, samples_num)
+                                 (shape[0], shape[1] * shape[3], shape[4]))  
         #print(features.size())
         features = torch.squeeze(features.transpose(1, -1))
 
@@ -218,13 +159,9 @@ class NN(torch.nn.Module):
         x1 = coords[:,self.dim:]
         
         x = torch.vstack((x0,x1))
-
-        #x = x.unsqueeze(1)
-        
         
         x  = self.act(self.encoder[0](x))
         for ii in range(1,self.nl1):
-            #i0 = x
             x_tmp = x
             x  = self.act(self.encoder[ii](x))
             x  = self.act(self.encoder1[ii](x) + x_tmp) 
@@ -269,7 +206,6 @@ class NN(torch.nn.Module):
 class Model():
     def __init__(self, ModelPath, DataPath, dim, pos,device='cpu'):
 
-        # ======================= JSON Template =======================
         self.Params = {}
         self.Params['ModelPath'] = ModelPath
         self.Params['DataPath'] = DataPath
@@ -278,26 +214,19 @@ class Model():
 
         # Pass the JSON information
         self.Params['Device'] = device
-        self.Params['Pytorch Amp (bool)'] = False
 
         self.Params['Network'] = {}
-        self.Params['Network']['Normlisation'] = 'OffsetMinMax'
 
         self.Params['Training'] = {}
-        self.Params['Training']['Number of sample points'] = 2e5
         self.Params['Training']['Batch Size'] = 10000
-        self.Params['Training']['Validation Percentage'] = 10
         self.Params['Training']['Number of Epochs'] = 20000
         self.Params['Training']['Resampling Bounds'] = [0.2, 0.95]
         self.Params['Training']['Print Every * Epoch'] = 1
         self.Params['Training']['Save Every * Epoch'] = 10
         self.Params['Training']['Learning Rate'] = 2e-4#5e-5
-        self.Params['Training']['Random Distance Sampling'] = True
-        self.Params['Training']['Use Scheduler (bool)'] = False
 
         # Parameters to alter during training
         self.total_train_loss = []
-        self.total_val_loss = []
     
     def gradient(self, y, x, create_graph=True):                                                               
                                                                                   
@@ -317,7 +246,7 @@ class Model():
         
         D = Xp[:,self.dim:]-Xp[:,:self.dim]
         
-        T0 = torch.einsum('ij,ij->i', D, D)#torch.norm(D, p=2, dim =1)**2
+        T0 = torch.einsum('ij,ij->i', D, D)
         
         
         DT0=dtau[:,:self.dim]
@@ -335,7 +264,6 @@ class Model():
         S0 = (T01-T02+T3)
         S1 = (T11-T12+T3)
        
-        #0.001
         sq_Ypred0 = 1/torch.sqrt(torch.sqrt(S0)/T3)
         sq_Ypred1 = 1/torch.sqrt(torch.sqrt(S1)/T3)
 
@@ -355,49 +283,28 @@ class Model():
 
     def train(self):
 
-        # Initialising the network
-        #self._init_network()
+       
 
         self.network = NN(self.Params['Device'],self.dim)
         self.network.apply(self.network.init_weights)
         #self.network.float()
         self.network.to(self.Params['Device'])
-        # Defining the optimization scheme
 
         
 
         self.optimizer = torch.optim.AdamW(
             self.network.parameters(), lr=self.Params['Training']['Learning Rate']
             ,weight_decay=0.1)
-        if self.Params['Training']['Use Scheduler (bool)'] == True:
-            self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer)
-            
+        
         self.dataset = db.Database(self.Params['DataPath'])
-
-        len_dataset = len(self.dataset)
-        n_batches = int(len(self.dataset) /
-                        int(self.Params['Training']['Batch Size']) + 1)
-        training_start_time = time.time()
-
-        # --------- Splitting the dataset into training and validation -------
-        indices = list(range(int(len_dataset)))
-        #validation_idx = np.random.choice(indices, size=int(
-        #    len_dataset*(self.Params['Training']['Validation Percentage']/100)), replace=False)
-        #train_idx = list(set(indices) - set(validation_idx))
-        train_idx = list(set(indices))
-        #validation_sampler = SubsetRandomSampler(validation_idx)
-        train_sampler = SubsetRandomSampler(train_idx)
-        '''
+        
+        
         dataloader = torch.utils.data.DataLoader(
             self.dataset,
             batch_size=int(self.Params['Training']['Batch Size']),
             num_workers = 0,
             shuffle=True)
-        '''
-        #'''
-        dataloader = FastTensorDataLoader(self.dataset.data, 
-                    batch_size=int(self.Params['Training']['Batch Size']), 
-                    shuffle=True)
+        
 
         weights = Tensor(torch.ones(len(self.dataset))).to(
             torch.device(self.Params['Device']))
@@ -427,8 +334,7 @@ class Model():
         
         weights = Tensor(torch.ones(len(self.dataset))).to(
                         torch.device(self.Params['Device']))
-        PATH = self.Params['ModelPath']+'/check.pt'
-        beta = 1.0
+        
         prev_diff = 1.0
         current_diff = 1.0
         #step = 1.0
@@ -445,22 +351,13 @@ class Model():
         self.l1 = 500
 
         for epoch in range(1, self.Params['Training']['Number of Epochs']+1):
-            t_0=time.time()
-            
-            print_every = 1
-            start_time = time.time()
-            running_sample_count = 0
             total_train_loss = 0
-            total_val_loss = 0
+
             total_diff=0
 
             
             self.lamb = min(1.0,max(0,(epoch-self.l0)/self.l1))
             
-
-            #current_state = copy.deepcopy(self.network.state_dict())
-            #if epoch%10 == 0:
-            #    prev_state = current_state
             prev_state_queue.append(current_state)
             prev_optimizer_queue.append(current_optimizer)
             if(len(prev_state_queue)>5):
@@ -470,24 +367,16 @@ class Model():
             current_state = pickle.loads(pickle.dumps(self.network.state_dict()))
             current_optimizer = pickle.loads(pickle.dumps(self.optimizer.state_dict()))
             
-            
-            
+        
             self.optimizer.param_groups[0]['lr']  = max(5e-4*(1-epoch/self.l0),1e-5)
             
-            prev_lr = self.optimizer.param_groups[0]['lr'] 
-            t_1=time.time()
-            #print(t_1-t_0)
-            t_0=time.time()
-            #print(prev)
             prev_diff = current_diff
             iter=0
             while True:
                 total_train_loss = 0
                 total_diff = 0
-                #for i in range(10):
+
                 for i, data in enumerate(train_loader_wei, 0):#train_loader_wei,dataloader
-                    #print('----------------- Epoch {} - Batch {} --------------------'.format(epoch,i))
-                    t0 = time.time()
                     
                     data=data[0].to(self.Params['Device'])
                     #data, indexbatch = data
@@ -504,10 +393,7 @@ class Model():
                         feature1 = feature1*self.lamb
 
                     loss_value, loss_n, wv = self.Loss(points, feature0, feature1, speed)
-                    t1 = time.time()
-                    #print(t1-t0)
-                    
-                    t0 = time.time()
+  
                     loss_value.backward()
 
                     # Update parameters
@@ -517,7 +403,6 @@ class Model():
                     
                     total_train_loss += loss_value.clone().detach()
                     total_diff += loss_n.clone().detach()
-                    t1 = time.time()
                     
                     
                     del points, speed, loss_value, loss_n, wv#,indexbatch
@@ -530,7 +415,6 @@ class Model():
                 diff_ratio = current_diff/prev_diff
             
                 if (diff_ratio < 1.2 and diff_ratio > 0):#1.5
-                    #self.optimizer.param_groups[0]['lr'] = prev_lr 
                     break
                 else:
                     
@@ -544,19 +428,8 @@ class Model():
                         epoch, total_diff))
                 
                 
-            #'''
             self.total_train_loss.append(total_train_loss)
-            
-            t_1=time.time()
-            #print(t_1-t_0)
-
-            #del train_loader_wei, train_sampler_wei
-
-            if self.Params['Training']['Use Scheduler (bool)'] == True:
-                self.scheduler.step(total_train_loss)
-
-            t_tmp = tt
-            tt=time.time()
+  
             
             if epoch % self.Params['Training']['Print Every * Epoch'] == 0:
                 with torch.no_grad():
@@ -579,7 +452,6 @@ class Model():
                     'val_loss': self.total_val_loss}, '{}/Model_Epoch_{}_ValLoss_{:.6e}.pt'.format(self.Params['ModelPath'], str(epoch).zfill(5), val_loss))
 
     def load(self, filepath):
-        #B = torch.load(self.Params['ModelPath']+'/B.pt')
         
         checkpoint = torch.load(
             filepath, map_location=torch.device(self.Params['Device']))
@@ -597,9 +469,7 @@ class Model():
 
 
     def TravelTimes(self, Xp, feature0, feature1):
-        # Apply projection from LatLong to UTM
         Xp = Xp.to(torch.device(self.Params['Device']))
-        
         
         tau, coords = self.network.out(Xp, feature0, feature1)
        
@@ -688,7 +558,6 @@ class Model():
         X,Y      = np.meshgrid(np.arange(xmin[0],xmax[0],spacing),np.arange(xmin[1],xmax[1],spacing))
 
         Xsrc = [0]*self.dim
-        #print(self.dim)
         
         Xsrc[0] = self.pos[0]
         Xsrc[1] = self.pos[1]
