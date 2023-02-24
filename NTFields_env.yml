@@ -17,8 +17,8 @@ dependencies:
     - pickle5
     - pytorch-kinematics
     - lxml
-  - run:
-    - python ./bvh-distance-queries/setup.py install
+
+
 
 
 
