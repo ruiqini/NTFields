@@ -30,7 +30,6 @@ Install requirements:
 ```setup
 conda env create -f NTFields_env.yml
 conda activate NTFields
-python ./bvh-distance-queries/setup.py install
 ```
 
 Download datasets and pretrained models, exact and put `datasets/` `Experiments/` to the repository directory:
