@@ -512,7 +512,7 @@ class Model():
                     'model_state_dict': self.network.state_dict(),
                     'optimizer_state_dict': self.optimizer.state_dict(),
                     'train_loss': self.total_train_loss,
-                    'val_loss': self.total_val_loss}, '{}/Model_Epoch_{}_ValLoss_{:.6e}.pt'.format(self.Params['ModelPath'], str(epoch).zfill(5), val_loss))
+                    'val_loss': self.total_train_loss}, '{}/Model_Epoch_{}_ValLoss_{:.6e}.pt'.format(self.Params['ModelPath'], str(epoch).zfill(5), val_loss))
 
     def load(self, filepath):
         
