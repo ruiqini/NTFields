@@ -113,7 +113,7 @@ for gib_id in range(2):
             all_p.append(xyz[j])
             all_p.append(xyz[j+1])
             for k in range(math.floor(ll/STEP)):
-                cur_p=xyz[j]+k*STEP*(xyz[j+1] - xyz[j])
+                cur_p=xyz[j]+k/math.floor(ll/STEP)*(xyz[j+1] - xyz[j])
                 all_p.append(cur_p)
         query_points = np.vstack(all_p)
         #print(query_points)
