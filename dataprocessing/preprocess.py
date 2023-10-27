@@ -3,7 +3,7 @@ import sys
 sys.path.append('.')
 
 from dataprocessing.convert_to_scaled_off import to_off
-from dataprocessing.speed_sampling_gpu import sample_speed
+from dataprocessing.speed_sampling import sample_speed
 import dataprocessing.voxelized_pointcloud_sampling as voxelized_pointcloud_sampling
 from glob import glob
 import configs.config_loader as cfg_loader
