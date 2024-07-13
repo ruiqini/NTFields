@@ -121,7 +121,7 @@ Please cite our paper if you find it useful in your research:
 ```
 
 ## Acknowledgement
-
+This implementation takes [EikoNet](https://github.com/Ulvetanna/EikoNet) and [NDF](https://github.com/jchibane/ndf/) as references. We thank the authors for their excellent work.
 
 
 ## License
